@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7a8ad6b3-c699-4e55-93fc-73a39eae9156" basePath="/post" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<flow name="PostCall" doc:id="1bbbee7f-d0c8-4ffc-95b6-97480300efaf" >
+		<http:listener doc:name="Listener" doc:id="0161a2d7-3e7a-458c-8e97-811d2a0288d4" config-ref="HTTP_Listener_config" path="/create"/>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="9751d91e-ee13-4497-af07-897cd4d0cbfc" mimeType="application/json"/>
+		<ee:transform doc:name="Transform Message" doc:id="3e2f800f-9e60-407a-8537-b6f10ecc95eb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload.empname as String
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="34ba7e07-66ff-4cb7-8e46-836dde763cd2" message='#[payload]'/>
+	</flow>
+	<flow name="GetCall" doc:id="407e1396-082a-4e9d-907e-233e96d30d3e" >
+		<http:listener doc:name="GetListener" doc:id="7336ceaa-95b7-44eb-9787-df5e7fe71866" config-ref="HTTP_Listener_config" path="/fetch">
+		</http:listener>
+		<set-payload value='{ "name" : "Ana", "office" : "BA" }'  doc:name="Set Payload" doc:id="da0ac624-9c63-4e81-9a11-6e603a0c34d2" mimeType="application/json" encoding="UTF-8" />
+		<ee:transform doc:name="Transform Message" doc:id="03541151-334a-447e-b7e9-fc30468690a6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ee2fc14c-206c-43fe-b6d0-51475a523cd1" message="#[payload]" />
+	</flow>
+</mule>
